@@ -11,7 +11,7 @@
   <% if (testimonials.length === 0) { %>
   <div style="text-align:center;padding:3rem;color:var(--muted);">
     <div style="font-size:3rem;">💬</div>
-    <p style="margin-top:1rem;">Belum ada testimoni. Tambahkan testimoni klien pertamamu!</p>
+    <p style="margin-top:1rem;">Belum ada testimoni.</p>
   </div>
   <% } else { %>
   <table>
@@ -19,7 +19,7 @@
       <tr><th>Nama</th><th>Bisnis</th><th>Rating</th><th>Kutipan</th><th>Aksi</th></tr>
     </thead>
     <tbody>
-    <% testimonials.forEach(t => { %>
+    <% testimonials.forEach(function(t, idx) { %>
     <tr>
       <td style="font-weight:600;"><%= t.name %></td>
       <td style="color:var(--muted);font-size:0.82rem;"><%= t.business %></td>
@@ -27,22 +27,15 @@
       <td style="color:var(--muted);font-size:0.82rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"<%= t.text %>"</td>
       <td>
         <div style="display:flex;gap:0.4rem;">
-          <button onclick="editTesti(
-            '<%= t._id %>',
-            '<%= (t.name||'').replace(/'/g,\"\\'\")||'' %>',
-            '<%= (t.business||'').replace(/'/g,\"\\'\")||'' %>',
-            '<%= (t.text||'').replace(/'/g,\"\\'\")||'' %>',
-            '<%= t.rating||5 %>',
-            '<%= t.order||99 %>'
-          )" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️</button>
-          <form action="/admin/testimonials/delete/<%= t._id %>" method="POST" onsubmit="return confirm('Hapus testimoni ini?')" style="display:inline;">
+          <button onclick="loadEditTesti(<%= idx %>)" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️</button>
+          <form action="/admin/testimonials/delete/<%= t._id %>" method="POST" onsubmit="return confirm('Hapus?')" style="display:inline;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.78rem;">🗑️</button>
           </form>
         </div>
       </td>
     </tr>
-    <% }) %>
+    <% }); %>
     </tbody>
   </table>
   <% } %>
@@ -55,9 +48,9 @@
     <form action="/admin/testimonials/save" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="form-grid">
-        <div class="form-group"><label>Nama Klien</label><input type="text" name="name" placeholder="Ibu Sari" required></div>
-        <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business" placeholder="Toko Kue Sari"></div>
-        <div class="form-group full"><label>Testimoni</label><textarea name="text" rows="3" placeholder="Website kami jadi lebih profesional..."></textarea></div>
+        <div class="form-group"><label>Nama Klien</label><input type="text" name="name" required></div>
+        <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business"></div>
+        <div class="form-group full"><label>Testimoni</label><textarea name="text" rows="3"></textarea></div>
         <div class="form-group"><label>Rating</label>
           <select name="rating">
             <option value="5">⭐⭐⭐⭐⭐ (5)</option>
@@ -104,13 +97,26 @@
 </div>
 
 <script>
-function editTesti(id, name, business, text, rating, order) {
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-business').value = business;
-  document.getElementById('edit-text').value = text;
-  document.getElementById('edit-rating').value = rating;
-  document.getElementById('edit-order').value = order;
+var testiData = <%- JSON.stringify(testimonials.map(function(t) {
+  return {
+    _id: t._id,
+    name: t.name || '',
+    business: t.business || '',
+    text: t.text || '',
+    rating: t.rating || 5,
+    order: t.order || 99
+  };
+})) %>;
+
+function loadEditTesti(idx) {
+  var t = testiData[idx];
+  if (!t) return;
+  document.getElementById('edit-id').value = t._id;
+  document.getElementById('edit-name').value = t.name;
+  document.getElementById('edit-business').value = t.business;
+  document.getElementById('edit-text').value = t.text;
+  document.getElementById('edit-rating').value = t.rating;
+  document.getElementById('edit-order').value = t.order;
   openModal('modal-edit');
 }
 </script>

@@ -7,7 +7,7 @@
   <button onclick="openModal('modal-add')" class="btn btn-primary">+ Tambah Paket</button>
 </div>
 
-<% packages.forEach(pkg => { %>
+<% packages.forEach(function(pkg, idx) { %>
 <div class="card" style="margin-bottom:1rem;">
   <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
     <div style="font-size:2rem;"><%= pkg.icon || '📦' %></div>
@@ -20,23 +20,13 @@
       <div style="font-size:1.3rem;font-weight:800;color:var(--gold);font-family:'Playfair Display',serif;"><%= pkg.price %></div>
       <div style="color:var(--muted);font-size:0.8rem;margin-bottom:0.75rem;"><%= pkg.priceNote %></div>
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
-        <% (pkg.features || []).forEach(f => { %>
+        <% (pkg.features || []).forEach(function(f) { %>
         <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--muted);">✓ <%= f %></span>
-        <% }) %>
+        <% }); %>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:0.5rem;">
-      <button onclick="editPackage(
-        '<%= pkg._id %>',
-        '<%= (pkg.icon||'').replace(/'/g,\"\\'\")||'' %>',
-        '<%= (pkg.name||'').replace(/'/g,\"\\'\")||'' %>',
-        '<%= (pkg.price||'').replace(/'/g,\"\\'\")||'' %>',
-        '<%= (pkg.priceNote||'').replace(/'/g,\"\\'\")||'' %>',
-        '<%= (pkg.note||'').replace(/'/g,\"\\'\")||'' %>',
-        '<%= pkg.order||99 %>',
-        `<%= (pkg.features||[]).join('\\n').replace(/`/g,'\\`') %>`,
-        <%= pkg.highlight ? 'true' : 'false' %>
-      )" class="btn btn-ghost">✏️ Edit</button>
+      <button onclick="loadEdit(<%= idx %>)" class="btn btn-ghost">✏️ Edit</button>
       <% if (user.role === 'admin') { %>
       <form action="/admin/packages/delete/<%= pkg._id %>" method="POST" onsubmit="return confirm('Hapus paket ini?')">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -46,7 +36,7 @@
     </div>
   </div>
 </div>
-<% }) %>
+<% }); %>
 
 <!-- ADD MODAL -->
 <div class="modal-overlay" id="modal-add">
@@ -108,17 +98,34 @@
   </div>
 </div>
 
+<!-- Data packages sebagai JSON untuk JavaScript -->
 <script>
-function editPackage(id, icon, name, price, priceNote, note, order, features, highlight) {
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-icon').value = icon;
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-price').value = price;
-  document.getElementById('edit-priceNote').value = priceNote;
-  document.getElementById('edit-note').value = note;
-  document.getElementById('edit-order').value = order;
-  document.getElementById('edit-features').value = features;
-  document.getElementById('edit-highlight').checked = highlight;
+var packagesData = <%- JSON.stringify(packages.map(function(p) {
+  return {
+    _id: p._id,
+    icon: p.icon || '',
+    name: p.name || '',
+    price: p.price || '',
+    priceNote: p.priceNote || '',
+    note: p.note || '',
+    order: p.order || 99,
+    features: p.features || [],
+    highlight: p.highlight || false
+  };
+})) %>;
+
+function loadEdit(idx) {
+  var pkg = packagesData[idx];
+  if (!pkg) return;
+  document.getElementById('edit-id').value = pkg._id;
+  document.getElementById('edit-icon').value = pkg.icon;
+  document.getElementById('edit-name').value = pkg.name;
+  document.getElementById('edit-price').value = pkg.price;
+  document.getElementById('edit-priceNote').value = pkg.priceNote;
+  document.getElementById('edit-note').value = pkg.note;
+  document.getElementById('edit-order').value = pkg.order;
+  document.getElementById('edit-features').value = pkg.features.join('\n');
+  document.getElementById('edit-highlight').checked = pkg.highlight;
   openModal('modal-edit');
 }
 </script>

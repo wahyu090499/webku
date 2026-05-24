@@ -20,19 +20,14 @@
       <tr><th>Nama</th><th>Username</th><th>Role</th><th>Aksi</th></tr>
     </thead>
     <tbody>
-    <% users.forEach(u => { %>
+    <% users.forEach(function(u, idx) { %>
     <tr>
       <td style="font-weight:600;"><%= u.name %></td>
       <td style="color:var(--muted);font-size:0.85rem;"><%= u.username %></td>
       <td><span class="badge <%= u.role === 'admin' ? 'badge-admin' : 'badge-editor' %>"><%= u.role === 'admin' ? '🔐 Admin' : '✏️ Editor' %></span></td>
       <td>
         <div style="display:flex;gap:0.4rem;">
-          <button onclick="editUser(
-            '<%= u._id %>',
-            '<%= (u.name||'').replace(/'/g,\"\\'\")||'' %>',
-            '<%= (u.username||'').replace(/'/g,\"\\'\")||'' %>',
-            '<%= u.role||'editor' %>'
-          )" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️ Edit</button>
+          <button onclick="loadEditUser(<%= idx %>)" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️ Edit</button>
           <% if (u._id.toString() !== user._id.toString()) { %>
           <form action="/admin/users/delete/<%= u._id %>" method="POST" onsubmit="return confirm('Hapus user ini?')" style="display:inline;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -44,13 +39,12 @@
         </div>
       </td>
     </tr>
-    <% }) %>
+    <% }); %>
     </tbody>
   </table>
   <% } %>
 </div>
 
-<!-- Role Info -->
 <div class="card">
   <div class="card-title">📋 Perbedaan Role</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -85,9 +79,9 @@
     <form action="/admin/users/save" method="POST">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="form-grid">
-        <div class="form-group"><label>Nama Lengkap</label><input type="text" name="name" placeholder="Nama User" required></div>
-        <div class="form-group"><label>Username</label><input type="text" name="username" placeholder="username" required></div>
-        <div class="form-group"><label>Password</label><input type="password" name="password" placeholder="Min. 6 karakter" required></div>
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" name="name" required></div>
+        <div class="form-group"><label>Username</label><input type="text" name="username" required></div>
+        <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
         <div class="form-group"><label>Role</label>
           <select name="role">
             <option value="editor">✏️ Editor</option>
@@ -113,7 +107,7 @@
       <div class="form-grid">
         <div class="form-group"><label>Nama Lengkap</label><input type="text" name="name" id="edit-name" required></div>
         <div class="form-group"><label>Username</label><input type="text" name="username" id="edit-username" required></div>
-        <div class="form-group"><label>Password Baru (kosongkan jika tidak diubah)</label><input type="password" name="password" placeholder="Biarkan kosong jika tidak diubah"></div>
+        <div class="form-group"><label>Password Baru (kosongkan jika tidak diubah)</label><input type="password" name="password"></div>
         <div class="form-group"><label>Role</label>
           <select name="role" id="edit-role">
             <option value="editor">✏️ Editor</option>
@@ -130,11 +124,22 @@
 </div>
 
 <script>
-function editUser(id, name, username, role) {
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-username').value = username;
-  document.getElementById('edit-role').value = role;
+var usersData = <%- JSON.stringify(users.map(function(u) {
+  return {
+    _id: u._id,
+    name: u.name || '',
+    username: u.username || '',
+    role: u.role || 'editor'
+  };
+})) %>;
+
+function loadEditUser(idx) {
+  var u = usersData[idx];
+  if (!u) return;
+  document.getElementById('edit-id').value = u._id;
+  document.getElementById('edit-name').value = u.name;
+  document.getElementById('edit-username').value = u.username;
+  document.getElementById('edit-role').value = u.role;
   openModal('modal-edit');
 }
 </script>
