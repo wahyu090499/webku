@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -90,11 +91,11 @@ router.post('/gallery/upload', requireAuth, upload.array('images', 10), (req, re
 });
 
 router.post('/gallery/delete/:id', requireAuth, (req, res) => {
-  db.gallery.findOne({ _id: req.params.id }, (err, item) => {
+  db.gallery.findOne({ _id: new mongoose.Types.ObjectId(req.params.id) }, (err, item) => {
     if (item) {
       const filePath = path.join(__dirname, '../public', item.path);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      db.gallery.remove({ _id: req.params.id }, {}, () => res.redirect('/admin/gallery?success=1'));
+      db.gallery.remove({ _id: new mongoose.Types.ObjectId(req.params.id) }, {}, () => res.redirect('/admin/gallery?success=1'));
     } else {
       res.redirect('/admin/gallery');
     }
@@ -102,7 +103,7 @@ router.post('/gallery/delete/:id', requireAuth, (req, res) => {
 });
 
 router.post('/gallery/caption/:id', requireAuth, (req, res) => {
-  db.gallery.update({ _id: req.params.id }, { $set: { caption: req.body.caption } }, {}, () => {
+  db.gallery.update({ _id: new mongoose.Types.ObjectId(req.params.id) }, { $set: { caption: req.body.caption } }, {}, () => {
     res.json({ ok: true });
   });
 });
@@ -119,14 +120,14 @@ router.post('/packages/save', requireAuth, (req, res) => {
   const data = { name, icon, price, priceNote, note, highlight: highlight === 'on', features: featuresArr, order: parseInt(order) || 99 };
   
   if (_id) {
-    db.packages.update({ _id }, { $set: data }, {}, () => res.redirect('/admin/packages?success=1'));
+    db.packages.update({ _id: new mongoose.Types.ObjectId(_id) }, { $set: data }, {}, () => res.redirect('/admin/packages?success=1'));
   } else {
     db.packages.insert(data, () => res.redirect('/admin/packages?success=1'));
   }
 });
 
 router.post('/packages/delete/:id', requireAuth, requireAdmin, (req, res) => {
-  db.packages.remove({ _id: req.params.id }, {}, () => res.redirect('/admin/packages?success=1'));
+  db.packages.remove({ _id: new mongoose.Types.ObjectId(req.params.id) }, {}, () => res.redirect('/admin/packages?success=1'));
 });
 
 // ====== TESTIMONIALS ======
@@ -140,14 +141,14 @@ router.post('/testimonials/save', requireAuth, (req, res) => {
   const data = { name, business, text, rating: parseInt(rating) || 5, order: parseInt(order) || 99 };
   
   if (_id) {
-    db.testimonials.update({ _id }, { $set: data }, {}, () => res.redirect('/admin/testimonials?success=1'));
+    db.testimonials.update({ _id: new mongoose.Types.ObjectId(_id) }, { $set: data }, {}, () => res.redirect('/admin/testimonials?success=1'));
   } else {
     db.testimonials.insert(data, () => res.redirect('/admin/testimonials?success=1'));
   }
 });
 
 router.post('/testimonials/delete/:id', requireAuth, (req, res) => {
-  db.testimonials.remove({ _id: req.params.id }, {}, () => res.redirect('/admin/testimonials?success=1'));
+  db.testimonials.remove({ _id: new mongoose.Types.ObjectId(req.params.id) }, {}, () => res.redirect('/admin/testimonials?success=1'));
 });
 
 // ====== USER MANAGEMENT (Admin only) ======
@@ -162,7 +163,7 @@ router.post('/users/save', requireAuth, requireAdmin, (req, res) => {
   if (password) data.password = bcrypt.hashSync(password, 10);
   
   if (_id) {
-    db.users.update({ _id }, { $set: data }, {}, () => res.redirect('/admin/users?success=1'));
+    db.users.update({ _id: new mongoose.Types.ObjectId(_id) }, { $set: data }, {}, () => res.redirect('/admin/users?success=1'));
   } else {
     if (!password) return res.redirect('/admin/users?error=nopass');
     data.password = bcrypt.hashSync(password, 10);
@@ -172,8 +173,8 @@ router.post('/users/save', requireAuth, requireAdmin, (req, res) => {
 });
 
 router.post('/users/delete/:id', requireAuth, requireAdmin, (req, res) => {
-  if (req.params.id === req.session.user._id) return res.redirect('/admin/users');
-  db.users.remove({ _id: req.params.id }, {}, () => res.redirect('/admin/users?success=1'));
+  if (req.params.id === req.session.user._id.toString()) return res.redirect('/admin/users');
+  db.users.remove({ _id: new mongoose.Types.ObjectId(req.params.id) }, {}, () => res.redirect('/admin/users?success=1'));
 });
 
 module.exports = router;
