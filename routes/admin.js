@@ -49,7 +49,7 @@ router.get('/content', requireAuth, async (req, res) => {
     getContent('hero'), getContent('about'), getContent('stats'),
     getContent('freeOffer'), getContent('contact'), getContent('footer'),
   ]);
-  res.render('admin/content', { user: req.session.user, hero, about, stats, freeOffer, contact, footer, success: req.query.success });
+  res.render('admin/content', { user: req.session.user, hero, about, stats, freeOffer, contact, footer, success: req.query.success, msg: req.query.msg || '' });
 });
 
 router.post('/content/:key', requireAuth, (req, res) => {
