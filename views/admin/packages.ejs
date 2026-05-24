@@ -1,0 +1,110 @@
+<%- include('_header', { title: 'Paket Layanan', page: 'packages', user }) %>
+
+<% if (success) { %><div class="alert alert-success">✅ Paket berhasil disimpan!</div><% } %>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+  <div style="color:var(--muted);font-size:0.875rem;"><%= packages.length %> paket terdaftar</div>
+  <button onclick="openModal('modal-add')" class="btn btn-primary">+ Tambah Paket</button>
+</div>
+
+<!-- PACKAGES LIST -->
+<% packages.forEach(pkg => { %>
+<div class="card" style="margin-bottom:1rem;">
+  <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+    <div style="font-size:2rem;"><%= pkg.icon || '📦' %></div>
+    <div style="flex:1;min-width:200px;">
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+        <strong style="font-family:'Syne',sans-serif;"><%= pkg.name %></strong>
+        <% if (pkg.highlight) { %><span class="badge badge-admin">⭐ Featured</span><% } %>
+        <% if (pkg.note) { %><span class="badge badge-editor"><%= pkg.note %></span><% } %>
+      </div>
+      <div style="font-size:1.3rem;font-weight:800;color:var(--navy);font-family:'Syne',sans-serif;"><%= pkg.price %></div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:0.75rem;"><%= pkg.priceNote %></div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+        <% (pkg.features || []).forEach(f => { %>
+        <span style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--muted);">✓ <%= f %></span>
+        <% }) %>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      <button onclick='editPackage(<%- JSON.stringify(pkg) %>)' class="btn btn-ghost">✏️ Edit</button>
+      <% if (user.role === 'admin') { %>
+      <form action="/admin/packages/delete/<%= pkg._id %>" method="POST" onsubmit="return confirm('Hapus paket ini?')">
+        <button type="submit" class="btn btn-danger" style="width:100%;">🗑️ Hapus</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+</div>
+<% }) %>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title">+ Tambah Paket Baru</div>
+    <form action="/admin/packages/save" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="form-grid">
+        <div class="form-group"><label>Icon (emoji)</label><input type="text" name="icon" placeholder="🚀"></div>
+        <div class="form-group"><label>Nama Paket</label><input type="text" name="name" placeholder="Paket Starter" required></div>
+        <div class="form-group"><label>Harga</label><input type="text" name="price" placeholder="Rp 500.000"></div>
+        <div class="form-group"><label>Keterangan Harga</label><input type="text" name="priceNote" placeholder="Sekali bayar"></div>
+        <div class="form-group"><label>Catatan (badge)</label><input type="text" name="note" placeholder="Paling Populer!"></div>
+        <div class="form-group"><label>Urutan Tampil</label><input type="number" name="order" value="99"></div>
+        <div class="form-group full">
+          <label>Fitur (1 baris = 1 fitur)</label>
+          <textarea name="features" rows="5" placeholder="Desain Responsif&#10;Halaman Admin&#10;Integrasi WhatsApp"></textarea>
+        </div>
+        <div class="form-group full">
+          <label><input type="checkbox" name="highlight"> Tampilkan sebagai Featured (highlighted)</label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal('modal-add')" class="btn btn-ghost">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Paket</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Paket</div>
+    <form action="/admin/packages/save" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="_id" id="edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label>Icon</label><input type="text" name="icon" id="edit-icon"></div>
+        <div class="form-group"><label>Nama Paket</label><input type="text" name="name" id="edit-name" required></div>
+        <div class="form-group"><label>Harga</label><input type="text" name="price" id="edit-price"></div>
+        <div class="form-group"><label>Keterangan Harga</label><input type="text" name="priceNote" id="edit-priceNote"></div>
+        <div class="form-group"><label>Catatan</label><input type="text" name="note" id="edit-note"></div>
+        <div class="form-group"><label>Urutan</label><input type="number" name="order" id="edit-order"></div>
+        <div class="form-group full"><label>Fitur (1 baris = 1 fitur)</label><textarea name="features" id="edit-features" rows="5"></textarea></div>
+        <div class="form-group full"><label><input type="checkbox" name="highlight" id="edit-highlight"> Featured</label></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal('modal-edit')" class="btn btn-ghost">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function editPackage(pkg) {
+  document.getElementById('edit-id').value = pkg._id;
+  document.getElementById('edit-icon').value = pkg.icon || '';
+  document.getElementById('edit-name').value = pkg.name || '';
+  document.getElementById('edit-price').value = pkg.price || '';
+  document.getElementById('edit-priceNote').value = pkg.priceNote || '';
+  document.getElementById('edit-note').value = pkg.note || '';
+  document.getElementById('edit-order').value = pkg.order || 99;
+  document.getElementById('edit-features').value = (pkg.features || []).join('\n');
+  document.getElementById('edit-highlight').checked = pkg.highlight || false;
+  openModal('modal-edit');
+}
+</script>
+
+<%- include('_footer') %>

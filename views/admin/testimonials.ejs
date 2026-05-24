@@ -1,0 +1,98 @@
+<%- include('_header', { title: 'Manajemen Testimoni', page: 'testimonials', user }) %>
+
+<% if (success) { %><div class="alert alert-success">✅ Testimoni berhasil disimpan!</div><% } %>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+  <div style="color:var(--muted);font-size:0.875rem;"><%= testimonials.length %> testimoni</div>
+  <button onclick="openModal('modal-add')" class="btn btn-primary">+ Tambah Testimoni</button>
+</div>
+
+<div class="card">
+  <% if (testimonials.length === 0) { %>
+  <div style="text-align:center;padding:3rem;color:var(--muted);">
+    <div style="font-size:3rem;">💬</div>
+    <p style="margin-top:1rem;">Belum ada testimoni. Tambahkan testimoni klien pertamamu!</p>
+  </div>
+  <% } else { %>
+  <table>
+    <thead>
+      <tr><th>Nama</th><th>Bisnis</th><th>Rating</th><th>Kutipan</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+    <% testimonials.forEach(t => { %>
+    <tr>
+      <td style="font-weight:600;"><%= t.name %></td>
+      <td style="color:var(--muted);font-size:0.82rem;"><%= t.business %></td>
+      <td style="color:#fbbf24;"><%= '★'.repeat(t.rating || 5) %></td>
+      <td style="color:var(--muted);font-size:0.82rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"<%= t.text %>"</td>
+      <td>
+        <div style="display:flex;gap:0.4rem;">
+          <button onclick='editTesti(<%- JSON.stringify(t) %>)' class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️</button>
+          <form action="/admin/testimonials/delete/<%= t._id %>" method="POST" onsubmit="return confirm('Hapus testimoni ini?')" style="display:inline;">
+            <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.78rem;">🗑️</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title">+ Tambah Testimoni</div>
+    <form action="/admin/testimonials/save" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="form-grid">
+        <div class="form-group"><label>Nama Klien</label><input type="text" name="name" placeholder="Ibu Sari" required></div>
+        <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business" placeholder="Toko Kue Sari"></div>
+        <div class="form-group full"><label>Testimoni / Kutipan</label><textarea name="text" rows="3" placeholder="Website kami jadi lebih profesional..."></textarea></div>
+        <div class="form-group"><label>Rating (1-5)</label><select name="rating"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option></select></div>
+        <div class="form-group"><label>Urutan Tampil</label><input type="number" name="order" value="99"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal('modal-add')" class="btn btn-ghost">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Testimoni</div>
+    <form action="/admin/testimonials/save" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="_id" id="edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label>Nama Klien</label><input type="text" name="name" id="edit-name" required></div>
+        <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business" id="edit-business"></div>
+        <div class="form-group full"><label>Testimoni</label><textarea name="text" id="edit-text" rows="3"></textarea></div>
+        <div class="form-group"><label>Rating</label><select name="rating" id="edit-rating"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option></select></div>
+        <div class="form-group"><label>Urutan</label><input type="number" name="order" id="edit-order"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal('modal-edit')" class="btn btn-ghost">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function editTesti(t) {
+  document.getElementById('edit-id').value = t._id;
+  document.getElementById('edit-name').value = t.name || '';
+  document.getElementById('edit-business').value = t.business || '';
+  document.getElementById('edit-text').value = t.text || '';
+  document.getElementById('edit-rating').value = t.rating || 5;
+  document.getElementById('edit-order').value = t.order || 99;
+  openModal('modal-edit');
+}
+</script>
+
+<%- include('_footer') %>

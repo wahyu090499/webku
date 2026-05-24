@@ -1,0 +1,6 @@
+node_modules/
+data/
+.env
+public/uploads/gallery/*
+!public/uploads/gallery/.gitkeep
+*.log

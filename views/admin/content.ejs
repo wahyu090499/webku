@@ -1,0 +1,106 @@
+<%- include('_header', { title: 'Edit Konten', page: 'content', user }) %>
+
+<% if (success) { %><div class="alert alert-success">✅ Konten berhasil disimpan!</div><% } %>
+
+<!-- HERO -->
+<div class="card">
+  <div class="card-title">🦸 Bagian Hero (Halaman Utama)</div>
+  <form action="/admin/content/hero" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Judul Utama</label>
+        <input type="text" name="title" value="<%= hero.title || '' %>" placeholder="Wujudkan Website Impian UMKM Anda">
+      </div>
+      <div class="form-group full">
+        <label>Subjudul</label>
+        <textarea name="subtitle" rows="2"><%= hero.subtitle || '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>Teks Tombol CTA</label>
+        <input type="text" name="cta" value="<%= hero.cta || '' %>" placeholder="Dapatkan Website Gratis">
+      </div>
+      <div class="form-group">
+        <label>Nomor WA (format: 628xxx)</label>
+        <input type="text" name="ctaWhatsapp" value="<%= hero.ctaWhatsapp || '' %>" placeholder="6281234567890">
+      </div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan Hero</button></div>
+  </form>
+</div>
+
+<!-- ABOUT -->
+<div class="card">
+  <div class="card-title">👤 Tentang Saya</div>
+  <form action="/admin/content/about" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-grid">
+      <div class="form-group"><label>Nama</label><input type="text" name="name" value="<%= about.name || '' %>" placeholder="Nama kamu"></div>
+      <div class="form-group"><label>Tagline</label><input type="text" name="tagline" value="<%= about.tagline || '' %>" placeholder="Web Developer & Digital Solution"></div>
+      <div class="form-group full"><label>Biografi</label><textarea name="bio" rows="4"><%= about.bio || '' %></textarea></div>
+      <div class="form-group"><label>Nomor WA (628xxx)</label><input type="text" name="phone" value="<%= about.phone || '' %>" placeholder="6281234567890"></div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" value="<%= about.email || '' %>" placeholder="hello@example.com"></div>
+      <div class="form-group"><label>Instagram (tanpa @)</label><input type="text" name="instagram" value="<%= about.instagram || '' %>" placeholder="username.ig"></div>
+      <div class="form-group"><label>Facebook</label><input type="text" name="facebook" value="<%= about.facebook || '' %>" placeholder="username.fb"></div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan About</button></div>
+  </form>
+</div>
+
+<!-- STATS -->
+<div class="card">
+  <div class="card-title">📊 Statistik (Hero Section)</div>
+  <form action="/admin/content/stats" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-grid">
+      <div class="form-group"><label>Website Dibuat</label><input type="text" name="websites" value="<%= stats.websites || '' %>" placeholder="20+"></div>
+      <div class="form-group"><label>Klien Puas</label><input type="text" name="clients" value="<%= stats.clients || '' %>" placeholder="15+"></div>
+      <div class="form-group"><label>Tahun Pengalaman</label><input type="text" name="years" value="<%= stats.years || '' %>" placeholder="2+"></div>
+      <div class="form-group"><label>Kepuasan Klien</label><input type="text" name="satisfaction" value="<%= stats.satisfaction || '' %>" placeholder="100%"></div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan Stats</button></div>
+  </form>
+</div>
+
+<!-- FREE OFFER -->
+<div class="card">
+  <div class="card-title">🎁 Penawaran Gratis</div>
+  <form action="/admin/content/freeOffer" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-grid">
+      <div class="form-group"><label>Judul</label><input type="text" name="title" value="<%= freeOffer.title || '' %>"></div>
+      <div class="form-group"><label>Harga Hosting</label><input type="text" name="priceHosting" value="<%= freeOffer.priceHosting || '' %>" placeholder="Mulai dari Rp 300.000/tahun"></div>
+      <div class="form-group full"><label>Subjudul</label><input type="text" name="subtitle" value="<%= freeOffer.subtitle || '' %>"></div>
+      <div class="form-group full"><label>Catatan / Call to Action</label><input type="text" name="note" value="<%= freeOffer.note || '' %>"></div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan Penawaran</button></div>
+  </form>
+</div>
+
+<!-- CONTACT -->
+<div class="card">
+  <div class="card-title">📞 Bagian Kontak</div>
+  <form action="/admin/content/contact" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-grid">
+      <div class="form-group"><label>Judul</label><input type="text" name="title" value="<%= contact.title || '' %>"></div>
+      <div class="form-group"><label>Subjudul</label><input type="text" name="subtitle" value="<%= contact.subtitle || '' %>"></div>
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan Kontak</button></div>
+  </form>
+</div>
+
+<!-- FOOTER -->
+<div class="card">
+  <div class="card-title">⬇️ Footer</div>
+  <form action="/admin/content/footer" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="form-group">
+      <label>Teks Copyright</label>
+      <input type="text" name="copyright" value="<%= footer.copyright || '' %>" placeholder="© 2025 WebKu. All rights reserved.">
+    </div>
+    <div style="margin-top:1rem;"><button type="submit" class="btn btn-primary">💾 Simpan Footer</button></div>
+  </form>
+</div>
+
+<%- include('_footer') %>
