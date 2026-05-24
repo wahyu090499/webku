@@ -1,6 +1,10 @@
 <%- include('_header', { title: 'Edit Konten', page: 'content', user }) %>
 
-<% if (success) { %><div class="alert alert-success">✅ Konten berhasil disimpan!</div><% } %>
+<% if (success && req.query.msg === 'photo') { %>
+<div class="alert alert-success">✅ Foto profil berhasil diupload! Refresh halaman untuk melihat preview.</div>
+<% } else if (success) { %>
+<div class="alert alert-success">✅ Konten berhasil disimpan!</div>
+<% } %>
 
 <!-- HERO -->
 <div class="card">

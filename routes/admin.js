@@ -70,8 +70,13 @@ router.post('/content/upload-photo', requireAuth, upload.single('photo'), (req, 
   if (!req.file) return res.redirect('/admin/content?error=nophoto');
   
   const photoPath = '/uploads/gallery/' + req.file.filename;
-  db.content.update({ key: 'about' }, { $set: { photo: photoPath } }, { upsert: true }, (err) => {
-    res.redirect('/admin/content?success=1');
+  // Ambil data about yang ada dulu, lalu update field photo saja
+  db.content.findOne({ key: 'about' }, (err, existing) => {
+    const data = Object.assign({}, existing || {}, { key: 'about', photo: photoPath });
+    delete data._id;
+    db.content.update({ key: 'about' }, { $set: { photo: photoPath } }, { upsert: true }, (err2) => {
+      res.redirect('/admin/content?success=1&msg=photo');
+    });
   });
 });
 

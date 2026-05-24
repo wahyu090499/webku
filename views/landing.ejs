@@ -487,10 +487,66 @@
       .free-hero-banner { grid-template-columns: 1fr; }
       .free-hero-banner::before { display: none; }
     }
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-card { display: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .free-hero-banner { grid-template-columns: 1fr; }
+      .free-hero-banner::before { display: none; }
+      .free-price-pill { width: 100%; }
+    }
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .hero-stats { gap: 1.5rem; }
       .contact-wrapper { padding: 3rem 1.5rem; }
+
+      /* Hero mobile */
+      .hero { padding: 7rem 1.25rem 3rem; }
+      h1.hero-title { font-size: 2.2rem; }
+      .hero-sub { font-size: 0.95rem; }
+      .hero-btns { flex-direction: column; }
+      .hero-btns a { width: 100%; text-align: center; justify-content: center; }
+      .hero-stats { gap: 1.25rem; padding-top: 1.5rem; margin-top: 2rem; }
+      .stat-num { font-size: 1.6rem; }
+
+      /* Free offer banner mobile */
+      .free-hero-banner { padding: 2rem 1.25rem; }
+      .free-banner-title { font-size: 1.4rem; }
+      .free-price-pill { padding: 1rem; }
+      .free-price-pill .pill-price { font-size: 1.2rem; }
+
+      /* Features grid mobile */
+      .free-features { grid-template-columns: 1fr; }
+
+      /* Packages mobile */
+      .packages-grid { grid-template-columns: 1fr; }
+
+      /* Gallery mobile */
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+
+      /* Testimonials mobile */
+      .testi-grid { grid-template-columns: 1fr; }
+
+      /* About mobile */
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+
+      /* Contact mobile */
+      .contact-wrapper { padding: 2.5rem 1.25rem; }
+      .contact-title { font-size: 1.8rem; }
+      .wa-btn { width: 100%; justify-content: center; }
+
+      /* Section padding mobile */
+      section { padding: 4rem 1.25rem; }
+
+      /* Nav */
+      .nav-inner { padding: 0 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      h1.hero-title { font-size: 1.9rem; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .section-title { font-size: 1.6rem; }
+      .free-hero-banner { padding: 1.75rem 1rem; }
     }
 
     /* ── ANIMATIONS ── */
