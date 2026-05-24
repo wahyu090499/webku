@@ -60,6 +60,21 @@ router.post('/content/:key', requireAuth, (req, res) => {
   });
 });
 
+// ====== PHOTO UPLOAD (About) ======
+router.post('/content/upload-photo', requireAuth, upload.single('photo'), (req, res) => {
+  // CSRF check untuk multipart
+  const token = req.body._csrf;
+  if (!token || token !== req.session.csrfToken) {
+    return res.redirect('/admin/content?error=csrf');
+  }
+  if (!req.file) return res.redirect('/admin/content?error=nophoto');
+  
+  const photoPath = '/uploads/gallery/' + req.file.filename;
+  db.content.update({ key: 'about' }, { $set: { photo: photoPath } }, { upsert: true }, (err) => {
+    res.redirect('/admin/content?success=1');
+  });
+});
+
 // ====== GALLERY ======
 router.get('/gallery', requireAuth, async (req, res) => {
   const gallery = await getAll(db.gallery, { order: 1 });
