@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
@@ -70,11 +70,10 @@ app.use(cookieParser(process.env.SESSION_SECRET || 'webku-secret'));
 // ── Session ──
 // maxAge = null → session cookie (hilang saat browser ditutup)
 app.use(session({
-  store: new FileStore({
-    path: sessionsDir,
-    ttl: 8 * 3600, // 8 jam max meski browser tidak ditutup
-    retries: 1,
-    logFn: () => {},
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URL || process.env.MONGODB_URL || 'mongodb://localhost:27017/webku',
+    ttl: 8 * 3600,
+    touchAfter: 24 * 3600,
   }),
   secret: process.env.SESSION_SECRET || 'webku-secret-fallback',
   resave: false,
