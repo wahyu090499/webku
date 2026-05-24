@@ -59,14 +59,6 @@ router.get('/content', requireAuth, async (req, res) => {
   res.render('admin/content', { user: req.session.user, hero, about, stats, freeOffer, contact, footer, success: req.query.success, msg: req.query.msg || '' });
 });
 
-router.post('/content/:key', requireAuth, (req, res) => {
-  const { key } = req.params;
-  const data = { ...req.body, key };
-  db.content.update({ key }, { $set: data }, { upsert: true }, (err) => {
-    res.redirect('/admin/content?success=1');
-  });
-});
-
 // ====== PHOTO UPLOAD (About) ======
 router.post('/content/upload-photo', requireAuth, uploadMemory.single('photo'), (req, res) => {
   // CSRF check untuk multipart
@@ -80,6 +72,14 @@ router.post('/content/upload-photo', requireAuth, uploadMemory.single('photo'), 
   const base64 = 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64');
   db.content.update({ key: 'about' }, { $set: { photo: base64 } }, { upsert: true }, (err) => {
     res.redirect('/admin/content?success=1&msg=photo');
+  });
+});
+
+router.post('/content/:key', requireAuth, (req, res) => {
+  const { key } = req.params;
+  const data = { ...req.body, key };
+  db.content.update({ key }, { $set: data }, { upsert: true }, (err) => {
+    res.redirect('/admin/content?success=1');
   });
 });
 
