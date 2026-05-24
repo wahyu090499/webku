@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const { db } = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
-// Multer setup
+// Multer setup - disk storage untuk gallery
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, '../public/uploads/gallery');
@@ -20,6 +20,13 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) cb(null, true);
+  else cb(new Error('Only images allowed'));
+}});
+
+// Memory storage untuk foto profil - langsung ke base64
+const memStorage = multer.memoryStorage();
+const uploadMemory = multer({ storage: memStorage, limits: { fileSize: 2 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) cb(null, true);
   else cb(new Error('Only images allowed'));
 }});
@@ -61,7 +68,7 @@ router.post('/content/:key', requireAuth, (req, res) => {
 });
 
 // ====== PHOTO UPLOAD (About) ======
-router.post('/content/upload-photo', requireAuth, upload.single('photo'), (req, res) => {
+router.post('/content/upload-photo', requireAuth, uploadMemory.single('photo'), (req, res) => {
   // CSRF check untuk multipart
   const token = req.body._csrf;
   if (!token || token !== req.session.csrfToken) {
@@ -69,14 +76,10 @@ router.post('/content/upload-photo', requireAuth, upload.single('photo'), (req, 
   }
   if (!req.file) return res.redirect('/admin/content?error=nophoto');
   
-  const photoPath = '/uploads/gallery/' + req.file.filename;
-  // Ambil data about yang ada dulu, lalu update field photo saja
-  db.content.findOne({ key: 'about' }, (err, existing) => {
-    const data = Object.assign({}, existing || {}, { key: 'about', photo: photoPath });
-    delete data._id;
-    db.content.update({ key: 'about' }, { $set: { photo: photoPath } }, { upsert: true }, (err2) => {
-      res.redirect('/admin/content?success=1&msg=photo');
-    });
+  // Simpan foto sebagai base64 ke MongoDB agar persistent di Railway
+  const base64 = 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64');
+  db.content.update({ key: 'about' }, { $set: { photo: base64 } }, { upsert: true }, (err) => {
+    res.redirect('/admin/content?success=1&msg=photo');
   });
 });
 
