@@ -7,29 +7,39 @@
   <button onclick="openModal('modal-add')" class="btn btn-primary">+ Tambah Paket</button>
 </div>
 
-<!-- PACKAGES LIST -->
 <% packages.forEach(pkg => { %>
 <div class="card" style="margin-bottom:1rem;">
   <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
     <div style="font-size:2rem;"><%= pkg.icon || '📦' %></div>
     <div style="flex:1;min-width:200px;">
       <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.5rem;">
-        <strong style="font-family:'Syne',sans-serif;"><%= pkg.name %></strong>
+        <strong style="font-family:'Playfair Display',serif;font-size:1rem;"><%= pkg.name %></strong>
         <% if (pkg.highlight) { %><span class="badge badge-admin">⭐ Featured</span><% } %>
         <% if (pkg.note) { %><span class="badge badge-editor"><%= pkg.note %></span><% } %>
       </div>
-      <div style="font-size:1.3rem;font-weight:800;color:var(--navy);font-family:'Syne',sans-serif;"><%= pkg.price %></div>
+      <div style="font-size:1.3rem;font-weight:800;color:var(--gold);font-family:'Playfair Display',serif;"><%= pkg.price %></div>
       <div style="color:var(--muted);font-size:0.8rem;margin-bottom:0.75rem;"><%= pkg.priceNote %></div>
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
         <% (pkg.features || []).forEach(f => { %>
-        <span style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--muted);">✓ <%= f %></span>
+        <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--muted);">✓ <%= f %></span>
         <% }) %>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:0.5rem;">
-      <button onclick='editPackage(<%- JSON.stringify(pkg) %>)' class="btn btn-ghost">✏️ Edit</button>
+      <button onclick="editPackage(
+        '<%= pkg._id %>',
+        '<%= (pkg.icon||'').replace(/'/g,\"\\'\")||'' %>',
+        '<%= (pkg.name||'').replace(/'/g,\"\\'\")||'' %>',
+        '<%= (pkg.price||'').replace(/'/g,\"\\'\")||'' %>',
+        '<%= (pkg.priceNote||'').replace(/'/g,\"\\'\")||'' %>',
+        '<%= (pkg.note||'').replace(/'/g,\"\\'\")||'' %>',
+        '<%= pkg.order||99 %>',
+        `<%= (pkg.features||[]).join('\\n').replace(/`/g,'\\`') %>`,
+        <%= pkg.highlight ? 'true' : 'false' %>
+      )" class="btn btn-ghost">✏️ Edit</button>
       <% if (user.role === 'admin') { %>
       <form action="/admin/packages/delete/<%= pkg._id %>" method="POST" onsubmit="return confirm('Hapus paket ini?')">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button type="submit" class="btn btn-danger" style="width:100%;">🗑️ Hapus</button>
       </form>
       <% } %>
@@ -56,7 +66,9 @@
           <textarea name="features" rows="5" placeholder="Desain Responsif&#10;Halaman Admin&#10;Integrasi WhatsApp"></textarea>
         </div>
         <div class="form-group full">
-          <label><input type="checkbox" name="highlight"> Tampilkan sebagai Featured (highlighted)</label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" name="highlight"> Tampilkan sebagai Featured
+          </label>
         </div>
       </div>
       <div class="modal-actions">
@@ -82,7 +94,11 @@
         <div class="form-group"><label>Catatan</label><input type="text" name="note" id="edit-note"></div>
         <div class="form-group"><label>Urutan</label><input type="number" name="order" id="edit-order"></div>
         <div class="form-group full"><label>Fitur (1 baris = 1 fitur)</label><textarea name="features" id="edit-features" rows="5"></textarea></div>
-        <div class="form-group full"><label><input type="checkbox" name="highlight" id="edit-highlight"> Featured</label></div>
+        <div class="form-group full">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+            <input type="checkbox" name="highlight" id="edit-highlight"> Featured
+          </label>
+        </div>
       </div>
       <div class="modal-actions">
         <button type="button" onclick="closeModal('modal-edit')" class="btn btn-ghost">Batal</button>
@@ -93,16 +109,16 @@
 </div>
 
 <script>
-function editPackage(pkg) {
-  document.getElementById('edit-id').value = pkg._id;
-  document.getElementById('edit-icon').value = pkg.icon || '';
-  document.getElementById('edit-name').value = pkg.name || '';
-  document.getElementById('edit-price').value = pkg.price || '';
-  document.getElementById('edit-priceNote').value = pkg.priceNote || '';
-  document.getElementById('edit-note').value = pkg.note || '';
-  document.getElementById('edit-order').value = pkg.order || 99;
-  document.getElementById('edit-features').value = (pkg.features || []).join('\n');
-  document.getElementById('edit-highlight').checked = pkg.highlight || false;
+function editPackage(id, icon, name, price, priceNote, note, order, features, highlight) {
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-icon').value = icon;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-price').value = price;
+  document.getElementById('edit-priceNote').value = priceNote;
+  document.getElementById('edit-note').value = note;
+  document.getElementById('edit-order').value = order;
+  document.getElementById('edit-features').value = features;
+  document.getElementById('edit-highlight').checked = highlight;
   openModal('modal-edit');
 }
 </script>

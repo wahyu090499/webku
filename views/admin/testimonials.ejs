@@ -23,12 +23,20 @@
     <tr>
       <td style="font-weight:600;"><%= t.name %></td>
       <td style="color:var(--muted);font-size:0.82rem;"><%= t.business %></td>
-      <td style="color:#fbbf24;"><%= '★'.repeat(t.rating || 5) %></td>
+      <td style="color:var(--gold);"><%= '★'.repeat(t.rating || 5) %></td>
       <td style="color:var(--muted);font-size:0.82rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"<%= t.text %>"</td>
       <td>
         <div style="display:flex;gap:0.4rem;">
-          <button onclick='editTesti(<%- JSON.stringify(t) %>)' class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️</button>
+          <button onclick="editTesti(
+            '<%= t._id %>',
+            '<%= (t.name||'').replace(/'/g,\"\\'\")||'' %>',
+            '<%= (t.business||'').replace(/'/g,\"\\'\")||'' %>',
+            '<%= (t.text||'').replace(/'/g,\"\\'\")||'' %>',
+            '<%= t.rating||5 %>',
+            '<%= t.order||99 %>'
+          )" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️</button>
           <form action="/admin/testimonials/delete/<%= t._id %>" method="POST" onsubmit="return confirm('Hapus testimoni ini?')" style="display:inline;">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.78rem;">🗑️</button>
           </form>
         </div>
@@ -49,9 +57,15 @@
       <div class="form-grid">
         <div class="form-group"><label>Nama Klien</label><input type="text" name="name" placeholder="Ibu Sari" required></div>
         <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business" placeholder="Toko Kue Sari"></div>
-        <div class="form-group full"><label>Testimoni / Kutipan</label><textarea name="text" rows="3" placeholder="Website kami jadi lebih profesional..."></textarea></div>
-        <div class="form-group"><label>Rating (1-5)</label><select name="rating"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option></select></div>
-        <div class="form-group"><label>Urutan Tampil</label><input type="number" name="order" value="99"></div>
+        <div class="form-group full"><label>Testimoni</label><textarea name="text" rows="3" placeholder="Website kami jadi lebih profesional..."></textarea></div>
+        <div class="form-group"><label>Rating</label>
+          <select name="rating">
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Urutan</label><input type="number" name="order" value="99"></div>
       </div>
       <div class="modal-actions">
         <button type="button" onclick="closeModal('modal-add')" class="btn btn-ghost">Batal</button>
@@ -72,7 +86,13 @@
         <div class="form-group"><label>Nama Klien</label><input type="text" name="name" id="edit-name" required></div>
         <div class="form-group"><label>Nama Bisnis</label><input type="text" name="business" id="edit-business"></div>
         <div class="form-group full"><label>Testimoni</label><textarea name="text" id="edit-text" rows="3"></textarea></div>
-        <div class="form-group"><label>Rating</label><select name="rating" id="edit-rating"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option></select></div>
+        <div class="form-group"><label>Rating</label>
+          <select name="rating" id="edit-rating">
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+          </select>
+        </div>
         <div class="form-group"><label>Urutan</label><input type="number" name="order" id="edit-order"></div>
       </div>
       <div class="modal-actions">
@@ -84,13 +104,13 @@
 </div>
 
 <script>
-function editTesti(t) {
-  document.getElementById('edit-id').value = t._id;
-  document.getElementById('edit-name').value = t.name || '';
-  document.getElementById('edit-business').value = t.business || '';
-  document.getElementById('edit-text').value = t.text || '';
-  document.getElementById('edit-rating').value = t.rating || 5;
-  document.getElementById('edit-order').value = t.order || 99;
+function editTesti(id, name, business, text, rating, order) {
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-business').value = business;
+  document.getElementById('edit-text').value = text;
+  document.getElementById('edit-rating').value = rating;
+  document.getElementById('edit-order').value = order;
   openModal('modal-edit');
 }
 </script>

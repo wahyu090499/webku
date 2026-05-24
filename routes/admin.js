@@ -153,7 +153,7 @@ router.post('/testimonials/delete/:id', requireAuth, (req, res) => {
 
 // ====== USER MANAGEMENT (Admin only) ======
 router.get('/users', requireAuth, requireAdmin, async (req, res) => {
-  const users = await new Promise(r => db.users.find({}, (e, docs) => r(docs || [])));
+  const users = await new Promise(r => db.users.find({}).sort({}).exec((e, docs) => r(docs || [])));
   res.render('admin/users', { user: req.session.user, users, success: req.query.success });
 });
 

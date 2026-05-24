@@ -2,8 +2,8 @@
 
 <% if (success) { %><div class="alert alert-success">✅ User berhasil disimpan!</div><% } %>
 
-<div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.875rem;">
-  🔐 Halaman ini hanya bisa diakses oleh <strong>Admin</strong>. Kamu bisa menambah editor yang bisa edit konten tapi tidak bisa hapus paket atau kelola user.
+<div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.875rem;color:var(--slate);">
+  🔐 Halaman ini hanya bisa diakses oleh <strong>Admin</strong>.
 </div>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
@@ -12,6 +12,9 @@
 </div>
 
 <div class="card">
+  <% if (!users || users.length === 0) { %>
+  <div style="text-align:center;padding:2rem;color:var(--muted);">Belum ada user.</div>
+  <% } else { %>
   <table>
     <thead>
       <tr><th>Nama</th><th>Username</th><th>Role</th><th>Aksi</th></tr>
@@ -24,9 +27,15 @@
       <td><span class="badge <%= u.role === 'admin' ? 'badge-admin' : 'badge-editor' %>"><%= u.role === 'admin' ? '🔐 Admin' : '✏️ Editor' %></span></td>
       <td>
         <div style="display:flex;gap:0.4rem;">
-          <button onclick='editUser(<%- JSON.stringify({_id: u._id, name: u.name, username: u.username, role: u.role}) %>)' class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️ Edit</button>
-          <% if (u._id !== user._id) { %>
+          <button onclick="editUser(
+            '<%= u._id %>',
+            '<%= (u.name||'').replace(/'/g,\"\\'\")||'' %>',
+            '<%= (u.username||'').replace(/'/g,\"\\'\")||'' %>',
+            '<%= u.role||'editor' %>'
+          )" class="btn btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.78rem;">✏️ Edit</button>
+          <% if (u._id.toString() !== user._id.toString()) { %>
           <form action="/admin/users/delete/<%= u._id %>" method="POST" onsubmit="return confirm('Hapus user ini?')" style="display:inline;">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.78rem;">🗑️</button>
           </form>
           <% } else { %>
@@ -38,6 +47,7 @@
     <% }) %>
     </tbody>
   </table>
+  <% } %>
 </div>
 
 <!-- Role Info -->
@@ -51,17 +61,17 @@
         <li>✅ Upload & hapus galeri</li>
         <li>✅ Tambah/edit/hapus paket</li>
         <li>✅ Tambah/hapus testimoni</li>
-        <li>✅ Kelola user (tambah/hapus)</li>
+        <li>✅ Kelola user</li>
       </ul>
     </div>
     <div style="background:var(--bg);border-radius:12px;padding:1rem;">
       <div style="font-weight:700;margin-bottom:0.75rem;"><span class="badge badge-editor">✏️ Editor</span></div>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:0.4rem;font-size:0.82rem;color:var(--muted);">
-        <li>✅ Edit konten (hero, about, dll)</li>
+        <li>✅ Edit konten</li>
         <li>✅ Upload galeri</li>
         <li>✅ Tambah/edit testimoni</li>
         <li>✅ Edit paket layanan</li>
-        <li>❌ Hapus paket layanan</li>
+        <li>❌ Hapus paket</li>
         <li>❌ Kelola user</li>
       </ul>
     </div>
@@ -103,7 +113,7 @@
       <div class="form-grid">
         <div class="form-group"><label>Nama Lengkap</label><input type="text" name="name" id="edit-name" required></div>
         <div class="form-group"><label>Username</label><input type="text" name="username" id="edit-username" required></div>
-        <div class="form-group"><label>Password Baru (kosongkan jika tidak ingin ubah)</label><input type="password" name="password" placeholder="Biarkan kosong jika tidak diubah"></div>
+        <div class="form-group"><label>Password Baru (kosongkan jika tidak diubah)</label><input type="password" name="password" placeholder="Biarkan kosong jika tidak diubah"></div>
         <div class="form-group"><label>Role</label>
           <select name="role" id="edit-role">
             <option value="editor">✏️ Editor</option>
@@ -120,11 +130,11 @@
 </div>
 
 <script>
-function editUser(u) {
-  document.getElementById('edit-id').value = u._id;
-  document.getElementById('edit-name').value = u.name;
-  document.getElementById('edit-username').value = u.username;
-  document.getElementById('edit-role').value = u.role;
+function editUser(id, name, username, role) {
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-username').value = username;
+  document.getElementById('edit-role').value = role;
   openModal('modal-edit');
 }
 </script>
